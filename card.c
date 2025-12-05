@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "card.h"
 
+#define RED "\x1b[31m"
+#define RESET "\x1b[0m"
+
 cardT *makeCard(int rank, char suit) {
     if (rank < 1 || rank > 13) return NULL;
     if (suit != 'C' && suit != 'D' && suit != 'H' && suit != 'S') return NULL;
@@ -50,10 +53,40 @@ int totalPile(cardT *pile) {
 }
 
 void showPile(cardT *pile) {
-    cardT *current = pile;
-    while (current != NULL) {
-        printf("%d%c ", current->rank, current->suit);
-        current = current->next;
+    cardT *curr;
+
+    if (pile == NULL) {
+        printf("(empty)\n");
+        return;
+    }
+
+    curr = pile;
+    while (curr != NULL) {
+        printf("┌────┐ ");
+        curr = curr->next;
+    }
+    printf("\n");
+
+    curr = pile;
+    while (curr != NULL) {
+        const char *color = (curr->suit == 'H' || curr->suit == 'D') ? RED : RESET;
+        printf("│%s%-2d%s  │ ", color, curr->rank, RESET);
+        curr = curr->next;
+    }
+    printf("\n");
+
+    curr = pile;
+    while (curr != NULL) {
+        const char *color = (curr->suit == 'H' || curr->suit == 'D') ? RED : RESET;
+        printf("│  %s%c%s │ ", color, curr->suit, RESET);
+        curr = curr->next;
+    }
+    printf("\n");
+
+    curr = pile;
+    while (curr != NULL) {
+        printf("└────┘ ");
+        curr = curr->next;
     }
     printf("\n");
 }
@@ -76,13 +109,29 @@ cardT *deal(cardT *pile) {
 
 char hitOrStand(void) {
     char word[100];
+
     while (1) {
-        if (scanf("%99s", word) != 1) continue;
+        printf("Hit or stand? (h/s): ");
+        fflush(stdout);
+
+        if (scanf("%99s", word) != 1) {
+            continue;
+        }
+
         char c = word[0];
-        if (c == 'h' || c == 'H') return 'h';
-        if (c == 's' || c == 'S') return 's';
+
+        if (c == 'h' || c == 'H') {
+            return 'h';
+        }
+
+        if (c == 's' || c == 'S') {
+            return 's';
+        }
+
+        printf("Please enter h or s.\n");
     }
 }
+
 cardT *shuffle(cardT *pile) {
     if (pile == NULL) {
         return NULL;
